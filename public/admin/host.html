@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>窩踐WorkExchange@Taiwan - Host Management</title>
+<style>
+body{
+	font-size:16px;
+	font-family:"Noto Sans TC", "微軟正黑體", "新細明體", arial, sans-serif;
+	color:#3f3a3a;line-height:2.5em;
+}
+textarea{
+	width:400px;height:100px;padding:5px;
+}
+input{
+	width:300px;padding:5px;
+}
+</style>
+</head>
+<body>
+	<h3>提供打工換宿的機會：</h3>
+	<form method="post" action="/api/1.0/admin/host" enctype="multipart/form-data">
+		
+		換宿單位識別碼 <input type="number" name="host_id" /><br/>
+		換宿單位名稱 <input type="text" name="host_name" /><br/>
+		聯絡方式(Email) <input type="text" name="contacts" /><br/>
+		類別 <select name="category">
+			<option value="hotel">民宿/青旅</option>
+			<option value="restaurant">餐廳</option>
+			<option value="store">商店</option>
+			<option value="diving">潛店</option>
+			<option value="surfing">衝浪店</option>
+			<option value="others">其他</option>
+		</select><br/>
+        地區 <select name="location">
+			<option value="Taiwan">台灣本島</option>
+			<option value="GreenIsland">綠島</option>
+			<option value="LanYu">蘭嶼</option>
+			<option value="XiaoLiuQiu">小琉球</option>
+			<option value="KinMen">金門</option>
+			<option value="MatSu">馬祖</option>
+			<option value="Others">其他</option>
+		</select><br/>
+		地址<input type="text" name="address" /><br/>
+        性別限制 <select name="gender">
+			<option value="female">限女</option>
+			<option value="male">限男</option>
+			<option value="both">不限</option>
+        </select><br/>
+        可否接受短期(一個月內) <select name="short_period">
+			<option value="reject">不接受短期</option>
+			<option value="accept">接受短期</option>
+        </select><br/>
+		換宿單位描述 <input type="text" name="description" />
+		<hr/>
+		換宿工作內容 <input type="text" name="needs" /><br/>
+		換宿福利 <input type="text" name="benefits" /><br/>
+		其他注意事項(含履歷要求、特殊注意事項) <input type="text" name="others" /><br/>
+		<hr/>
+		換宿期間開始 <input type="date" name="start_date" /><br/>
+		換宿期間結束 <input type="date" name="end_date" /><br/>
+		名額 <input type="text" name="vacants" />
+		<hr/>
+		Main Image <input type="file" name="main_image" /><br/>
+        Other Images <br/>
+        <input type="file" name="other_images" multiple /><br/>
+        <input type="file" name="other_images" multiple /><br/>
+		<br/>
+		<input type="submit" value="Create" />
+	</form>
+</body>
+</html>

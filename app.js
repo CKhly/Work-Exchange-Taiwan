@@ -2,12 +2,14 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const { PORT, API_VERSION } = process.env;
+app.use(express.static('public'));
 
 app.get("/",(req,res)=>{
     res.send("Work Exchange Taiwan")
 })
 
 app.use('/api/' + API_VERSION, [
+    require('./server/routes/admin_route'),
     require('./server/routes/host_route'),
     require('./server/routes/user_route')
 ]);
