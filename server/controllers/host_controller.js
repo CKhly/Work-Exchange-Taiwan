@@ -1,23 +1,30 @@
 const Host = require('../models/host_model');
-const pageSize = 4;
+const pageSize = 40;
+const { GetCoordinates } = require('../../util/util')
 
 const createHost = async (req, res) => {
+    console.log("createHost")
     const body = req.body;
+    const location = await GetCoordinates(body.host_name);
     const host = {
         host_id: body.host_id,
         host_name: body.host_name,
         host_contacts: body.contacts,
         host_category: body.category,
         host_location: body.location,
-        host_address: body.address,
+        host_lng: location[0],
+        host_lat: location[1],
         host_gender_needs: body.gender,
         short_period: body.short_period,
         host_description: body.description,
         host_needs: body.needs,
         host_benefits: body.benefits,
         host_others: body.others,
+        host_create_date: new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
     }
+    console.log("host: ", host)
     host.host_mainImage = req.files.main_image[0].filename;
+    console.log("host_mainImage: ", host.host_mainImage)
     const images = req.files.other_images.map(
         img => ([host.host_id, img.filename])
     )
@@ -46,8 +53,20 @@ const getHosts = async (req, res) => {
         switch (location) {
             case 'all':
                 return await Host.getHosts(pageSize, paging);
-            case 'Taiwan': case 'GreenIsland': case 'LanYu': case 'XiaoLiuQiu': case 'KinMen': case 'LaMatSu': case 'Others':
-                return await Host.getHosts(pageSize, paging, {location});
+            case 'Taiwan': 
+                return await Host.getHosts(pageSize, paging, {location:1});
+            case 'GreenIsland': 
+                return await Host.getHosts(pageSize, paging, {location:5});
+            case 'LanYu':
+                return await Host.getHosts(pageSize, paging, {location:6});
+            case 'XiaoLiuQiu':
+                return await Host.getHosts(pageSize, paging, {location:7});
+            case 'PenHu':
+                return await Host.getHosts(pageSize, paging, {location:8});
+            case 'KinMen':
+                return await Host.getHosts(pageSize, paging, {location:9});
+            case 'MaTsu':
+                return await Host.getHosts(pageSize, paging, {location:10});
             case 'search': { 
                 const keyword = req.query.keyword;
                 if (keyword) {
@@ -83,6 +102,12 @@ const getHosts = async (req, res) => {
     res.status(200).json(result);
 }
 
+const getHostsStatistics = async (req, res) => {
+    const locationCount = await Host.getHostsStatistics();
+    console.log("hi", locationCount)
+    res.status(200).json(locationCount);
+}
+
 const getHostDetail = async (req, res) => {
     const id = req.params.id;
     async function findHostDetail(id) {
@@ -110,5 +135,6 @@ const getHostDetail = async (req, res) => {
 module.exports = {
     createHost,
     getHosts,
+    getHostsStatistics,
     getHostDetail,
 };

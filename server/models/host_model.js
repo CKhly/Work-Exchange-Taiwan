@@ -64,6 +64,15 @@ const getHosts = async (pageSize, paging = 0, requirement = {}) => {
     };
 };
 
+const getHostsStatistics = async () => {
+    console.log("getHostsStatistics");
+    const locationQueryStr = 'SELECT location.*, count(host_table.host_id) as count FROM location LEFT JOIN host_table on host_table.host_location = location.id GROUP BY location.name';
+    const categoryQueryStr = 'SELECT category.*, count(host_table.host_id) as count FROM category LEFT JOIN host_table on host_table.host_category = category.id GROUP BY category.name';
+    const [locationResult] = await pool.query(locationQueryStr);
+    const [categoryResult] = await pool.query(categoryQueryStr);
+    return [locationResult, categoryResult];
+}
+
 const getHostImages = async (hostId) => {
     console.log("getHostImages")
     const queryStr = 'SELECT * FROM host_images WHERE host_id IN (?)';
@@ -73,7 +82,7 @@ const getHostImages = async (hostId) => {
 };
 
 const getHostComments = async (hostId) => {
-    const queryStr = 'SELECT * FROM host_comments WHERE host_id IN (?)';
+    const queryStr = 'SELECT user_table.name, user_table.picture, comments.* FROM comments LEFT JOIN user_table ON comments.user_id = user_table.user_id WHERE host_id IN (?)';
     const bindings = [hostId];
     const [comments] = await pool.query(queryStr, bindings);
     return comments;
@@ -90,6 +99,7 @@ const getHostVacants = async (hostId) => {
 module.exports = {
     createHost,
     getHosts,
+    getHostsStatistics,
     getHostImages,
     getHostComments,
     getHostVacants

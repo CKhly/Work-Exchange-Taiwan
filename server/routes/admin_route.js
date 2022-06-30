@@ -1,7 +1,7 @@
 const router = require('express').Router();
-const {upload} = require('../../util/util');
+const {uploadHost} = require('../../util/util');
 
-const cpUpload = upload.fields([
+const cpUpload = uploadHost.fields([
     { name: 'main_image', maxCount: 1 },
     { name: 'other_images', maxCount: 3 }
 ]);
