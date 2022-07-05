@@ -20,6 +20,7 @@ const createHost = async (req, res) => {
         host_needs: body.needs,
         host_benefits: body.benefits,
         host_others: body.others,
+        host_likes: 0,
         host_create_date: new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
     }
     console.log("host: ", host)
