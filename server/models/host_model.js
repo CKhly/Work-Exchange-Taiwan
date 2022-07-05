@@ -25,19 +25,19 @@ const getHosts = async (pageSize, paging = 0, requirement = {}) => {
     console.log('requirement', requirement);
     if (requirement.location != null) {
         console.log("location:", requirement.location)
-        condition.sql = 'WHERE host_location = ?';
+        condition.sql = 'WHERE host_table.host_location = ?';
         condition.binding = [requirement.location];
     } else if (requirement.keyword != null) {
         console.log("keyword: ", requirement.keyword);
-        condition.sql = 'WHERE host_name LIKE ?';
+        condition.sql = 'WHERE host_table.host_name LIKE ?';
         condition.binding = [`%${requirement.keyword}%`];
     } else if (requirement.id != null) {
         console.log("id: ", requirement.id)
-        condition.sql = 'WHERE host_id = ?';
+        condition.sql = 'WHERE host_table.host_id = ?';
         condition.binding = [requirement.id];
     } else if(requirement.genderNeeds != null){
         console.log(requirement.genderNeeds, requirement.category, requirement.shortPeriod)
-        condition.sql = 'WHERE host_gender_needs IN (?) && host_category IN (?)  && short_period IN (?)';
+        condition.sql = 'WHERE host_table.host_gender_needs IN (?) && host_table.host_category IN (?)  && host_table.short_period IN (?)';
         condition.binding = [
             [requirement.genderNeeds], 
             [requirement.category], 
@@ -50,7 +50,7 @@ const getHosts = async (pageSize, paging = 0, requirement = {}) => {
         binding: [pageSize * paging, pageSize],
     };
 
-    const hostQuery = 'SELECT * FROM host_table ' + condition.sql + ' ORDER BY host_id ' + limit.sql;
+    const hostQuery = 'SELECT host_table.*, location.name as location_name, category.name as category_name, gender.name as gender_name FROM host_table LEFT JOIN location on location.id = host_table.host_location LEFT JOIN category on category.id = host_table.host_category LEFT JOIN gender on gender.id = host_table.host_gender_needs ' + condition.sql + ' ORDER BY host_id ' + limit.sql;
     const hostBindings = condition.binding.concat(limit.binding);
     const [hosts] = await pool.query(hostQuery, hostBindings);
 
@@ -68,9 +68,13 @@ const getHostsStatistics = async () => {
     console.log("getHostsStatistics");
     const locationQueryStr = 'SELECT location.*, count(host_table.host_id) as count FROM location LEFT JOIN host_table on host_table.host_location = location.id GROUP BY location.name';
     const categoryQueryStr = 'SELECT category.*, count(host_table.host_id) as count FROM category LEFT JOIN host_table on host_table.host_category = category.id GROUP BY category.name';
+    const likesQueryStr = 'SELECT host_table.*, location.name as location_name, category.name as category_name, gender.name as gender_name FROM host_table LEFT JOIN location on location.id = host_table.host_location LEFT JOIN category on category.id = host_table.host_category LEFT JOIN gender on gender.id = host_table.host_gender_needs ORDER BY host_table.host_likes DESC LIMIT 5';
+    const lastupdateQueryStr = 'SELECT host_table.*, location.name as location_name, category.name as category_name, gender.name as gender_name FROM host_table LEFT JOIN location on location.id = host_table.host_location LEFT JOIN category on category.id = host_table.host_category LEFT JOIN gender on gender.id = host_table.host_gender_needs  ORDER BY host_table.host_create_date DESC LIMIT 5';
     const [locationResult] = await pool.query(locationQueryStr);
     const [categoryResult] = await pool.query(categoryQueryStr);
-    return [locationResult, categoryResult];
+    const [likesResult] = await pool.query(likesQueryStr);
+    const [lastupdateResult] = await pool.query(lastupdateQueryStr);
+    return [locationResult, categoryResult, likesResult, lastupdateResult];
 }
 
 const getHostImages = async (hostId) => {
@@ -95,6 +99,13 @@ const getHostVacants = async (hostId) => {
     return vacants;
 };
 
+const getHostLikes = async (hostId) => {
+    const queryStr = 'SELECT count(user_id) FROM likes WHERE host_id IN (?)';
+    const bindings = [hostId];
+    const [likes] = await pool.query(queryStr, bindings);
+    return likes;
+};
+
 
 module.exports = {
     createHost,
@@ -102,5 +113,6 @@ module.exports = {
     getHostsStatistics,
     getHostImages,
     getHostComments,
-    getHostVacants
+    getHostVacants,
+    getHostLikes
 };

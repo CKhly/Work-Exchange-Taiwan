@@ -252,7 +252,7 @@ const getComments = async (userId) => {
 const getLikes = async function (userId){
     const conn = await pool.getConnection();
     try {
-        const [likes] = await conn.query('SELECT host_table.* FROM likes LEFT JOIN host_table on likes.host_id = host_table.host_id WHERE user_id = ?', [userId])
+        const [likes] = await conn.query('SELECT host_table.*, location.name as location_name, category.name as category_name, gender.name as gender_name FROM likes LEFT JOIN host_table on likes.host_id = host_table.host_id LEFT JOIN location on location.id = host_table.host_location LEFT JOIN category on category.id = host_table.host_category LEFT JOIN gender on gender.id = host_table.host_gender_needs WHERE user_id = ?', [userId])
         console.log("likes", likes);
         return likes;
     } catch (e) {
@@ -293,8 +293,10 @@ const updateAvatar = async function (email, avatar){
 const createLike = async function (likes){
     const conn = await pool.getConnection();
     try {
-        const [result] = await conn.query('INSERT INTO likes SET ?', [likes])
-        return result;
+        const [result1] = await conn.query('INSERT INTO likes SET ?', [likes])
+        const [result2] = await conn.query('SELECT COUNT(DISTINCT user_id) as count from likes where host_id = ?', [likes.host_id])
+        const [result3] = await conn.query('UPDATE host_table SET host_likes = ? WHERE host_id = ?', [result2[0].count , likes.host_id])
+        return result3;
     } catch (e) {
         console.log(e)
         return -1;
@@ -307,7 +309,9 @@ const deleteLike = async function (userId, hostId) {
     const conn = await pool.getConnection();
     try {
         const [result] = await conn.query('DELETE FROM likes WHERE user_id = ? AND host_id = ?', [ userId, hostId])
-        return result;
+        const [result2] = await conn.query('SELECT COUNT(DISTINCT user_id) as count from likes where host_id = ?', [hostId])
+        const [result3] = await conn.query('UPDATE host_table SET host_likes = ? WHERE host_id = ?', [result2[0].count , hostId])
+        return result3;
     } catch (e) {
         console.log(e)
         return -1;

@@ -103,9 +103,8 @@ const getHosts = async (req, res) => {
 }
 
 const getHostsStatistics = async (req, res) => {
-    const locationCount = await Host.getHostsStatistics();
-    console.log("hi", locationCount)
-    res.status(200).json(locationCount);
+    const hostStats = await Host.getHostsStatistics();
+    res.status(200).json(hostStats);
 }
 
 const getHostDetail = async (req, res) => {
